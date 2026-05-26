@@ -1,0 +1,5 @@
+.next
+node_modules
+.env*
+upload-site-images.mjs
+patch-product-images.mjs
