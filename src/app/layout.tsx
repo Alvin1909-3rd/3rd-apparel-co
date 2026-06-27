@@ -10,9 +10,25 @@ export const metadata: Metadata = {
   title: '3rd Apparel Co | Baltimore Streetwear',
   description: 'Culture. Arts. History. Premium private label apparel and accessories from Baltimore, MD.',
   openGraph: {
-    title: '3rd Apparel Co',
+    title: '3rd Apparel Co | Baltimore Streetwear',
     description: 'Culture. Arts. History. Premium private label apparel from Baltimore, MD.',
     siteName: '3rd Apparel Co',
+    url: 'https://www.3rdapparelco.com',
+    type: 'website',
+    images: [
+      {
+        url: 'https://xakihabewfanylylcwqw.supabase.co/storage/v1/object/public/site-images/feed/Img1.jpg',
+        width: 1200,
+        height: 630,
+        alt: '3rd Apparel Co — Baltimore Streetwear',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '3rd Apparel Co | Baltimore Streetwear',
+    description: 'Culture. Arts. History. Premium private label apparel from Baltimore, MD.',
+    images: ['https://xakihabewfanylylcwqw.supabase.co/storage/v1/object/public/site-images/feed/Img1.jpg'],
   },
 }
 

@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import type { Metadata } from 'next'
 import { supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import { Product } from '@/lib/types'
@@ -13,6 +14,41 @@ async function getProduct(slug: string): Promise<Product | null> {
     .eq('slug', slug)
     .single()
   return data
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const product = await getProduct(slug)
+  if (!product) return {}
+
+  const image = product.images[0]
+  const title = `${product.name} — 3rd Apparel Co`
+  const description = `${product.description}. $${product.price}. Shop now at 3rd Apparel Co, Baltimore streetwear.`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `https://www.3rdapparelco.com/shop/${product.slug}`,
+      type: 'website',
+      siteName: '3rd Apparel Co',
+      ...(image && {
+        images: [{ url: image, width: 1200, height: 1200, alt: product.name }],
+      }),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      ...(image && { images: [image] }),
+    },
+  }
 }
 
 export default async function ProductPage({
