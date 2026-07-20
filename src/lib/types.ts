@@ -28,6 +28,8 @@ export interface Order {
   status: 'pending' | 'paid' | 'shipped' | 'delivered'
   stripe_payment_intent: string
   shipping_address: ShippingAddress
+  tracking_number?: string
+  emails_sent?: string[]
   created_at: string
 }
 

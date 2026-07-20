@@ -99,6 +99,29 @@ export function orderConfirmationHtml(order: Order): string {
           </td>
         </tr>
 
+        <!-- Brand Story -->
+        <tr>
+          <td style="padding:32px 40px;border-bottom:1px solid #e8e4df;background:#faf9f7;">
+            <p style="margin:0 0 12px;font-size:14px;color:#0e0e0e;line-height:1.8;">
+              Real talk &mdash; 3rd Apparel Co isn&rsquo;t a brand that came out of a boardroom. It came out of the same place a lot of things do: a vision, a grind, and refusing to wait for permission. Every piece we make is intentional. Private label, quality materials, built to last.
+            </p>
+            <p style="margin:0;font-size:14px;color:#0e0e0e;line-height:1.8;">
+              You&rsquo;re one of the first people to wear it. That matters to us.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Social CTA -->
+        <tr>
+          <td style="padding:24px 40px;border-bottom:1px solid #e8e4df;">
+            <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:#8a6510;">Follow Along</p>
+            <p style="margin:0;font-size:13px;color:#5a5650;line-height:1.6;">
+              We&rsquo;re documenting the build &mdash; new drops, behind-the-scenes, and the story as it unfolds. Find us at
+              <a href="https://instagram.com/3rdapparelco" style="color:#c25b2a;text-decoration:none;">@3rdapparelco</a>.
+            </p>
+          </td>
+        </tr>
+
         <!-- CTA -->
         <tr>
           <td style="padding:32px 40px;border-bottom:1px solid #e8e4df;text-align:center;">

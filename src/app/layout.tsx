@@ -5,6 +5,8 @@ import Footer from '@/components/Footer'
 import { CartProvider } from '@/context/CartContext'
 import EmailCapturePopup from '@/components/EmailCapturePopup'
 import CartDrawer from '@/components/CartDrawer'
+import ConditionalChrome from '@/components/ConditionalChrome'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: '3rd Apparel Co | Baltimore Streetwear',
@@ -58,12 +60,17 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col" style={{ backgroundColor: '#0e0e0e', color: '#f0ece4' }}>
         <CartProvider>
-          <Navbar />
+          <ConditionalChrome>
+            <Navbar />
+          </ConditionalChrome>
           <main className="flex-1">{children}</main>
-          <Footer />
-          <EmailCapturePopup />
-          <CartDrawer />
+          <ConditionalChrome>
+            <Footer />
+            <EmailCapturePopup />
+            <CartDrawer />
+          </ConditionalChrome>
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   )
