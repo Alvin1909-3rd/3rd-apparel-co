@@ -27,20 +27,11 @@ export const metadata: Metadata = {
     siteName: '3rd Apparel Co',
     url: 'https://www.3rdapparelco.com/guide',
     type: 'website',
-    images: [
-      {
-        url: 'https://www.3rdapparelco.com/icons/ledger-og.png',
-        width: 1200,
-        height: 630,
-        alt: 'The Ledger — Crypto education by 3rd Apparel Co',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'The Ledger — Crypto, the easy way',
     description: 'A living guide to actually owning your money — no bank, no gatekeeper, no permission needed.',
-    images: ['https://www.3rdapparelco.com/icons/ledger-og.png'],
   },
 };
 
