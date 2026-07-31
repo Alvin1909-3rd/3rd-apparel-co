@@ -1,19 +1,25 @@
-﻿'use client'
-
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { pixelInitiateCheckout } from '@/lib/pixel'
+import { lookupPromo, PromoCode } from '@/lib/promoCodes'
 
 export default function CheckoutClient() {
   const { cart, total, clear } = useCart()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [promoInput, setPromoInput] = useState('')
+  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null)
+  const [promoError, setPromoError] = useState('')
 
-  const shipping = total >= 75 ? 0 : 8.99
+  const isTestOrder = cart.some((item) => item.product.slug === 'test-product')
+  const baseShipping = isTestOrder || total >= 75 ? 0 : 8.99
+  const promoDiscount = appliedPromo?.type === 'free_shipping' ? baseShipping : 0
+  const shipping = baseShipping - promoDiscount
   const orderTotal = total + shipping
 
   useEffect(() => {
@@ -38,6 +44,24 @@ export default function CheckoutClient() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
+  const applyPromo = () => {
+    if (!promoInput.trim()) return
+    const promo = lookupPromo(promoInput)
+    if (!promo) {
+      setPromoError('Invalid promo code')
+      setAppliedPromo(null)
+      return
+    }
+    setAppliedPromo(promo)
+    setPromoError('')
+  }
+
+  const removePromo = () => {
+    setAppliedPromo(null)
+    setPromoInput('')
+    setPromoError('')
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -47,14 +71,16 @@ export default function CheckoutClient() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart, shippingAddress: form, email: form.email }),
+        body: JSON.stringify({
+          cart,
+          shippingAddress: form,
+          email: form.email,
+          promoCode: appliedPromo ? promoInput.trim().toUpperCase() : undefined,
+        }),
       })
 
       const data = await res.json()
-
       if (!res.ok) throw new Error(data.error || 'Checkout failed')
-
-      // Redirect to Stripe
       window.location.href = data.url
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
@@ -140,27 +166,75 @@ export default function CheckoutClient() {
           </form>
 
           {/* Order Summary */}
-          <div
-            className="h-fit p-6"
-            style={{ backgroundColor: '#f7f5f2', border: '1px solid #d8d2ca' }}
-          >
+          <div className="h-fit p-6" style={{ backgroundColor: '#f7f5f2', border: '1px solid #d8d2ca' }}>
             <h2 className="text-2xl mb-6" style={{ fontFamily: 'Bebas Neue, sans-serif', color: '#0e0e0e' }}>Order Summary</h2>
+
             <div className="space-y-3 mb-6">
               {cart.map((item) => (
-                <div key={`${item.product.id}-${item.size}`} className="flex justify-between text-sm">
+                <div key={`${item.product.id}-${item.size}-${item.color ?? ''}`} className="flex justify-between text-sm">
                   <span style={{ color: '#5a5650' }}>
-                    {item.product.name} <span style={{ color: '#d8d2ca' }}>Ã—</span> {item.quantity}
-                    <span className="ml-1 text-xs">({item.size})</span>
+                    {item.product.name} <span style={{ color: '#d8d2ca' }}>×</span> {item.quantity}
+                    <span className="ml-1 text-xs">
+                      ({[item.color, item.size].filter(Boolean).join(' / ')})
+                    </span>
                   </span>
                   <span style={{ color: '#0e0e0e' }}>${(item.product.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
-            <div className="space-y-2 text-sm pt-4" style={{ borderTop: '1px solid #d8d2ca' }}>
+
+            {/* Promo Code */}
+            <div className="mb-4 pb-4" style={{ borderBottom: '1px solid #d8d2ca' }}>
+              {appliedPromo ? (
+                <div className="flex items-center justify-between text-sm">
+                  <span style={{ color: '#8a6510' }}>
+                    ✓ {promoInput.toUpperCase()} — {appliedPromo.label}
+                  </span>
+                  <button
+                    onClick={removePromo}
+                    className="text-xs uppercase tracking-wide"
+                    style={{ color: '#9e9a94', background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Promo code"
+                      value={promoInput}
+                      onChange={(e) => { setPromoInput(e.target.value); setPromoError('') }}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), applyPromo())}
+                      className="flex-1 px-3 py-2 text-sm outline-none"
+                      style={{ backgroundColor: '#fff', border: '1px solid #d8d2ca', color: '#0e0e0e' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={applyPromo}
+                      className="px-4 py-2 text-xs uppercase tracking-widest transition-all hover:opacity-80"
+                      style={{ backgroundColor: '#0e0e0e', color: '#f0ece4', border: 'none', cursor: 'pointer' }}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {promoError && <p className="text-xs" style={{ color: '#c25b2a' }}>{promoError}</p>}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span style={{ color: '#5a5650' }}>Subtotal</span>
                 <span style={{ color: '#0e0e0e' }}>${total.toFixed(2)}</span>
               </div>
+              {promoDiscount > 0 && (
+                <div className="flex justify-between">
+                  <span style={{ color: '#8a6510' }}>Promo ({promoInput.toUpperCase()})</span>
+                  <span style={{ color: '#8a6510' }}>−${promoDiscount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span style={{ color: '#5a5650' }}>Shipping</span>
                 <span style={{ color: shipping === 0 ? '#8a6510' : '#0e0e0e' }}>
@@ -178,4 +252,3 @@ export default function CheckoutClient() {
     </div>
   )
 }
-

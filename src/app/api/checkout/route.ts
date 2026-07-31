@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase'
 import { CartItem } from '@/lib/types'
+import { lookupPromo } from '@/lib/promoCodes'
 
 export async function POST(req: NextRequest) {
   try {
-    const { cart, shippingAddress, email } = await req.json()
+    const { cart, shippingAddress, email, promoCode } = await req.json()
 
     if (!cart?.length) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
@@ -16,7 +17,9 @@ export async function POST(req: NextRequest) {
       0
     )
     const isTestOrder = cart.some((item: CartItem) => item.product.slug === 'test-product')
-    const shipping = subtotal >= 75 || isTestOrder ? 0 : 8.99
+    const appliedPromo = promoCode ? lookupPromo(promoCode) : null
+    const baseShipping = subtotal >= 75 || isTestOrder ? 0 : 8.99
+    const shipping = appliedPromo?.type === 'free_shipping' ? 0 : baseShipping
     const total = subtotal + shipping
 
     // Create order in Supabase
