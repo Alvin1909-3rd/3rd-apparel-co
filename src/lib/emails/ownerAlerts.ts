@@ -1,6 +1,7 @@
 interface OrderItem {
   product: { name: string; price: number }
   size: string
+  color?: string
   quantity: number
 }
 
@@ -31,7 +32,7 @@ interface LowStockProduct {
 
 export function ownerNewOrderHtml(order: NewOrderData): string {
   const itemList = order.items
-    .map((i) => `${i.product.name} (${i.size}) x${i.quantity}`)
+    .map((i) => `${i.product.name}${i.color ? ` - ${i.color}` : ''} (${i.size}) x${i.quantity}`)
     .join(', ')
 
   return `

@@ -92,7 +92,7 @@ export default function CartDrawer() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {cart.map((item) => (
-                <div key={`${item.product.id}-${item.size}`} style={{ display: 'flex', gap: 14, paddingBottom: 20, borderBottom: '1px solid #1a1a1a' }}>
+                <div key={`${item.product.id}-${item.size}-${item.color ?? ''}`} style={{ display: 'flex', gap: 14, paddingBottom: 20, borderBottom: '1px solid #1a1a1a' }}>
                   {/* Thumbnail */}
                   <div style={{ position: 'relative', width: 76, height: 96, flexShrink: 0, backgroundColor: '#1a1a1a', overflow: 'hidden' }}>
                     {item.product.images[0] ? (
@@ -109,7 +109,9 @@ export default function CartDrawer() {
                     <p style={{ fontFamily: 'Bebas Neue, sans-serif', color: '#f0ece4', fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.product.name}
                     </p>
-                    <p style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9e9a94', marginTop: 2 }}>Size: {item.size}</p>
+                    <p style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9e9a94', marginTop: 2 }}>
+                      {item.color ? `${item.color} / ` : ''}Size: {item.size}
+                    </p>
                     <p style={{ fontSize: '0.85rem', color: '#c8a96e', marginTop: 4 }}>${(item.product.price * item.quantity).toFixed(2)}</p>
 
                     {/* Qty + Remove */}
@@ -120,19 +122,19 @@ export default function CartDrawer() {
                         style={{ display: 'flex', alignItems: 'center', border: '1px solid #2e2e2e' }}
                       >
                         <button
-                          onClick={() => item.quantity > 1 ? update(item.product.id, item.size, item.quantity - 1) : remove(item.product.id, item.size)}
+                          onClick={() => item.quantity > 1 ? update(item.product.id, item.size, item.color ?? '', item.quantity - 1) : remove(item.product.id, item.size, item.color ?? '')}
                           aria-label={`Decrease quantity of ${item.product.name}`}
                           style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: '#9e9a94', cursor: 'pointer', fontSize: '1rem' }}
                         >−</button>
                         <span aria-live="polite" aria-label={`Quantity: ${item.quantity}`} style={{ width: 28, textAlign: 'center', fontSize: '0.85rem', color: '#f0ece4' }}>{item.quantity}</span>
                         <button
-                          onClick={() => update(item.product.id, item.size, item.quantity + 1)}
+                          onClick={() => update(item.product.id, item.size, item.color ?? '', item.quantity + 1)}
                           aria-label={`Increase quantity of ${item.product.name}`}
                           style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: '#9e9a94', cursor: 'pointer', fontSize: '1rem' }}
                         >+</button>
                       </div>
                       <button
-                        onClick={() => remove(item.product.id, item.size)}
+                        onClick={() => remove(item.product.id, item.size, item.color ?? '')}
                         aria-label={`Remove ${item.product.name} from cart`}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9e9a94', lineHeight: 0, padding: 4 }}
                       >

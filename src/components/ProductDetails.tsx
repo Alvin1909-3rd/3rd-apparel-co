@@ -6,19 +6,26 @@ import { ShoppingBag, Check } from 'lucide-react'
 import { Product } from '@/lib/types'
 import { useCart } from '@/context/CartContext'
 import { pixelAddToCart } from '@/lib/pixel'
+import { getProductColors, getInventoryKey } from '@/lib/cart'
 
 export default function ProductDetails({ product }: { product: Product }) {
   const { add, openCart } = useCart()
   const [activeImage, setActiveImage] = useState(0)
+  const [selectedColor, setSelectedColor] = useState('')
   const [selectedSize, setSelectedSize] = useState('')
   const [error, setError] = useState('')
   const [added, setAdded] = useState(false)
   const [stickyVisible, setStickyVisible] = useState(false)
   const atcRef = useRef<HTMLDivElement>(null)
 
-  const availableSizes = product.sizes.filter((s) => (product.inventory[s] || 0) > 0)
+  const colors = getProductColors(product.inventory)
+  const hasColors = colors.length > 0
 
-  // Show sticky bar when main ATC scrolls out of view
+  const availableSizes = product.sizes.filter((s) => {
+    const key = getInventoryKey(s, hasColors ? selectedColor : '')
+    return (product.inventory[key] || 0) > 0
+  })
+
   useEffect(() => {
     const el = atcRef.current
     if (!el) return
@@ -30,19 +37,20 @@ export default function ProductDetails({ product }: { product: Product }) {
     return () => observer.disconnect()
   }, [])
 
-  const handleAdd = (size?: string) => {
-    const sz = size || selectedSize
-    if (!sz) {
-      setError('Please select a size')
-      return
-    }
-    add(product, sz)
+  const handleAdd = (sizeOverride?: string, colorOverride?: string) => {
+    const sz = sizeOverride || selectedSize
+    const cl = colorOverride !== undefined ? colorOverride : selectedColor
+    if (hasColors && !cl) { setError('Please select a color'); return }
+    if (!sz) { setError('Please select a size'); return }
+    add(product, sz, cl)
     pixelAddToCart(product.id, product.name, product.price)
     setAdded(true)
     setError('')
     openCart()
     setTimeout(() => setAdded(false), 2000)
   }
+
+  const sizeButtonsDisabled = hasColors && !selectedColor
 
   return (
     <>
@@ -113,9 +121,9 @@ export default function ProductDetails({ product }: { product: Product }) {
             {product.description}
           </p>
 
-          {/* Size + ATC — sentinel for sticky bar */}
+          {/* Color + Size + ATC */}
           <div ref={atcRef}>
-            {availableSizes.length === 0 ? (
+            {availableSizes.length === 0 && !hasColors ? (
               <div
                 className="w-full py-4 text-center text-sm uppercase tracking-widest"
                 style={{ border: '1px solid #2e2e2e', color: '#9e9a94' }}
@@ -124,24 +132,55 @@ export default function ProductDetails({ product }: { product: Product }) {
               </div>
             ) : (
               <div className="space-y-4">
+                {/* Color selector */}
+                {hasColors && (
+                  <div>
+                    <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#9e9a94' }}>
+                      Select Color{selectedColor ? `: ${selectedColor}` : ''}
+                    </p>
+                    <div className="flex flex-wrap gap-2" role="group" aria-label="Select a color">
+                      {colors.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => { setSelectedColor(color); setSelectedSize(''); setError('') }}
+                          aria-pressed={selectedColor === color}
+                          className="px-4 h-10 text-sm uppercase tracking-wide transition-all"
+                          style={{
+                            backgroundColor: selectedColor === color ? '#c25b2a' : 'transparent',
+                            color: selectedColor === color ? '#f0ece4' : '#f0ece4',
+                            border: `1px solid ${selectedColor === color ? '#c25b2a' : '#2e2e2e'}`,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {color}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Size selector */}
                 <div>
-                  <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#9e9a94' }}>Select Size</p>
+                  <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#9e9a94' }}>
+                    {sizeButtonsDisabled ? 'Select a color first' : 'Select Size'}
+                  </p>
                   <div className="flex flex-wrap gap-2" role="group" aria-label="Select a size">
                     {product.sizes.map((size) => {
-                      const inStock = availableSizes.includes(size)
+                      const inStock = !sizeButtonsDisabled && availableSizes.includes(size)
+                      const disabled = sizeButtonsDisabled || !inStock
                       return (
                         <button
                           key={size}
-                          onClick={() => { if (inStock) { setSelectedSize(size); setError('') } }}
-                          disabled={!inStock}
+                          onClick={() => { if (!disabled) { setSelectedSize(size); setError('') } }}
+                          disabled={disabled}
                           aria-pressed={selectedSize === size}
                           className="w-12 h-12 text-sm uppercase font-medium transition-all"
                           style={{
                             backgroundColor: selectedSize === size ? '#c25b2a' : 'transparent',
-                            color: selectedSize === size ? '#f0ece4' : inStock ? '#f0ece4' : '#2e2e2e',
-                            border: `1px solid ${selectedSize === size ? '#c25b2a' : inStock ? '#2e2e2e' : '#1a1a1a'}`,
-                            cursor: inStock ? 'pointer' : 'not-allowed',
-                            textDecoration: !inStock ? 'line-through' : 'none',
+                            color: selectedSize === size ? '#f0ece4' : disabled ? '#2e2e2e' : '#f0ece4',
+                            border: `1px solid ${selectedSize === size ? '#c25b2a' : disabled ? '#1a1a1a' : '#2e2e2e'}`,
+                            cursor: disabled ? 'not-allowed' : 'pointer',
+                            textDecoration: !sizeButtonsDisabled && !inStock ? 'line-through' : 'none',
                           }}
                         >
                           {size}
@@ -151,6 +190,7 @@ export default function ProductDetails({ product }: { product: Product }) {
                   </div>
                   {error && <p className="text-xs mt-2" style={{ color: '#c25b2a' }}>{error}</p>}
                 </div>
+
                 <button
                   onClick={() => handleAdd()}
                   className="w-full py-4 text-sm uppercase tracking-widest font-semibold flex items-center justify-center gap-3 transition-all hover:opacity-90"
@@ -178,7 +218,7 @@ export default function ProductDetails({ product }: { product: Product }) {
       </div>
 
       {/* Sticky add-to-cart bar */}
-      {availableSizes.length > 0 && (
+      {(availableSizes.length > 0 || hasColors) && (
         <div
           style={{
             position: 'fixed', bottom: 0, left: 0, right: 0,
@@ -220,7 +260,7 @@ export default function ProductDetails({ product }: { product: Product }) {
           </div>
 
           <button
-            onClick={() => handleAdd(selectedSize)}
+            onClick={() => handleAdd(selectedSize, selectedColor)}
             style={{
               padding: '10px 20px', flexShrink: 0,
               backgroundColor: added ? '#2d4a2d' : '#c25b2a',

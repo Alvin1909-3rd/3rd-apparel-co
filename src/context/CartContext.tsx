@@ -8,9 +8,9 @@ interface CartContextType {
   cart: CartItem[]
   count: number
   total: number
-  add: (product: Product, size: string, qty?: number) => void
-  remove: (productId: string, size: string) => void
-  update: (productId: string, size: string, qty: number) => void
+  add: (product: Product, size: string, color?: string, qty?: number) => void
+  remove: (productId: string, size: string, color?: string) => void
+  update: (productId: string, size: string, color: string, qty: number) => void
   clear: () => void
   isCartOpen: boolean
   openCart: () => void
@@ -27,16 +27,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart(getCart())
   }, [])
 
-  const add = (product: Product, size: string, qty = 1) => {
-    setCart(addToCart(product, size, qty))
+  const add = (product: Product, size: string, color = '', qty = 1) => {
+    setCart(addToCart(product, size, color, qty))
   }
 
-  const remove = (productId: string, size: string) => {
-    setCart(removeFromCart(productId, size))
+  const remove = (productId: string, size: string, color = '') => {
+    setCart(removeFromCart(productId, size, color))
   }
 
-  const update = (productId: string, size: string, qty: number) => {
-    setCart(updateQuantity(productId, size, qty))
+  const update = (productId: string, size: string, color: string, qty: number) => {
+    setCart(updateQuantity(productId, size, color, qty))
   }
 
   const clear = () => {

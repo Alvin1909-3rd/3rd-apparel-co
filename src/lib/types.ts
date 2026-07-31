@@ -15,6 +15,7 @@ export interface Product {
 export interface CartItem {
   product: Product
   size: string
+  color: string
   quantity: number
 }
 

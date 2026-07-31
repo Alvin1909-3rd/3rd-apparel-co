@@ -1,6 +1,7 @@
 interface OrderItem {
   product: { name: string; price: number }
   size: string
+  color?: string
   quantity: number
 }
 
@@ -26,7 +27,7 @@ export function orderConfirmationHtml(order: Order): string {
   const itemRows = order.items.map((item) => `
     <tr>
       <td style="padding:12px 0;border-bottom:1px solid #e8e4df;font-size:14px;color:#0e0e0e;">
-        ${item.product.name} <span style="color:#8a6510;">(${item.size})</span>
+        ${item.product.name} <span style="color:#8a6510;">(${[item.color, item.size].filter(Boolean).join(' / ')})</span>
       </td>
       <td style="padding:12px 0;border-bottom:1px solid #e8e4df;font-size:14px;color:#0e0e0e;text-align:right;">
         x${item.quantity}

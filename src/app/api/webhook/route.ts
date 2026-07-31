@@ -67,7 +67,8 @@ export async function POST(req: NextRequest) {
 
           if (product?.inventory) {
             const updated = { ...product.inventory }
-            updated[item.size] = Math.max(0, (updated[item.size] || 0) - item.quantity)
+            const invKey = item.color ? `${item.color}-${item.size}` : item.size
+            updated[invKey] = Math.max(0, (updated[invKey] || 0) - item.quantity)
             await supabaseAdmin.from('products').update({ inventory: updated }).eq('id', product.id)
 
             const totalUnits = Object.values(updated as Record<string, number>).reduce((a, b) => a + b, 0)
