@@ -42,7 +42,7 @@ export default async function ShopPage({
         {/* Category Filter */}
         <div className="flex gap-3 flex-wrap mb-10" style={{ borderBottom: '1px solid #d8d2ca', paddingBottom: '1.5rem' }}>
           {categories.map((cat) => {
-            const value = cat === 'All' ? 'all' : cat.toLowerCase()
+            const value = cat === 'All' ? 'all' : cat
             const isActive = (!category && cat === 'All') || category === value
             return (
               <a
