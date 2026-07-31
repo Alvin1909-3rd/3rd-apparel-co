@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       try {
         await sendAndMark(order.id, sent, 'day3', () =>
           resend.emails.send({
-            from: '3rd Apparel Co <orders@3rdapparelco.com>',
+            from: '3rd Apparel Co <onboarding@resend.dev>',
             to: order.email,
             subject: 'Your cap is on the move',
             html: shippingUpdateHtml(name, num),
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       try {
         await sendAndMark(order.id, sent, 'day7', () =>
           resend.emails.send({
-            from: '3rd Apparel Co <orders@3rdapparelco.com>',
+            from: '3rd Apparel Co <onboarding@resend.dev>',
             to: order.email,
             subject: 'Something for coming back',
             html: discountEmailHtml(name),
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
     try {
       await sendAndMark(order.id, sent, 'abandoned', () =>
         resend.emails.send({
-          from: '3rd Apparel Co <orders@3rdapparelco.com>',
+          from: '3rd Apparel Co <onboarding@resend.dev>',
           to: order.email,
           subject: 'You left something behind',
           html: abandonedCartEmailHtml(name, order.items),
@@ -131,7 +131,7 @@ export async function GET(req: NextRequest) {
     }
 
     await resend.emails.send({
-      from: '3rd Apparel Co <orders@3rdapparelco.com>',
+      from: '3rd Apparel Co <onboarding@resend.dev>',
       to: OWNER_EMAIL,
       subject: `3rd Apparel Co — Daily Summary (${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`,
       html: ownerDailyDigestHtml(recentOrders || [], revenue, lowStock, outOfStock),

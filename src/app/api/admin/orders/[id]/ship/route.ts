@@ -29,7 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   await resend.emails.send({
-    from: '3rd Apparel Co <orders@3rdapparelco.com>',
+    from: '3rd Apparel Co <onboarding@resend.dev>',
     to: order.email,
     subject: `Your order is on the way — #${orderNum}`,
     html: shippedEmailHtml(firstName, orderNum, trackingNumber.trim()),

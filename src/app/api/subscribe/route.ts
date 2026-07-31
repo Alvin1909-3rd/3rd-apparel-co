@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (data && data.length > 0) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       await resend.emails.send({
-        from: '3rd Apparel Co <orders@3rdapparelco.com>',
+        from: '3rd Apparel Co <onboarding@resend.dev>',
         to: email.toLowerCase().trim(),
         subject: `You're in. Here's ${DISCOUNT_CODE} — 10% off your first order.`,
         html: welcomeEmailHtml(DISCOUNT_CODE),
