@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
       (sum: number, item: CartItem) => sum + item.product.price * item.quantity,
       0
     )
-    const shipping = subtotal >= 75 ? 0 : 8.99
+    const isTestOrder = cart.some((item: CartItem) => item.product.slug === 'test-product')
+    const shipping = subtotal >= 75 || isTestOrder ? 0 : 8.99
     const total = subtotal + shipping
 
     // Create order in Supabase
