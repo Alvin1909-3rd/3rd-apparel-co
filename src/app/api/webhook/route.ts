@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
         // Customer: order confirmation
         await resend.emails.send({
-          from: '3rd Apparel Co <onboarding@resend.dev>',
+          from: '3rd Apparel Co <orders@3rdapparelco.com>',
           to: order.email,
           subject: `Order Confirmed — #${orderNum}`,
           html: orderConfirmationHtml(order),
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
         // Owner: new order alert
         await resend.emails.send({
-          from: '3rd Apparel Co <onboarding@resend.dev>',
+          from: '3rd Apparel Co <orders@3rdapparelco.com>',
           to: OWNER_EMAIL,
           subject: `New Order — #${orderNum} ($${order.total.toFixed(2)})`,
           html: ownerNewOrderHtml({
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
         if (lowStockProducts.length > 0) {
           const hasOutOfStock = lowStockProducts.some((p) => p.totalUnits === 0)
           await resend.emails.send({
-            from: '3rd Apparel Co <onboarding@resend.dev>',
+            from: '3rd Apparel Co <orders@3rdapparelco.com>',
             to: OWNER_EMAIL,
             subject: hasOutOfStock ? 'Out of Stock Alert — 3rd Apparel Co' : 'Low Stock Alert — 3rd Apparel Co',
             html: ownerLowStockHtml(lowStockProducts),

@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     }
 
     await resend.emails.send({
-      from: '3rd Apparel Co <onboarding@resend.dev>',
+      from: '3rd Apparel Co <orders@3rdapparelco.com>',
       to: 'orders@3rdapparelco.com',
       replyTo: email,
       subject: `[3rd Apparel Co] ${subject} — from ${name}`,
