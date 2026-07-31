@@ -1,5 +1,4 @@
-﻿'use client'
-
+'use client'
 
 import { useCart } from '@/context/CartContext'
 import Image from 'next/image'
@@ -29,7 +28,8 @@ export default function CartClient() {
     )
   }
 
-  const shipping = total >= 75 ? 0 : 8.99
+  const isTestOrder = cart.some((item) => item.product.slug === 'test-product')
+  const shipping = isTestOrder || total >= 75 ? 0 : 8.99
 
   return (
     <div className="min-h-screen px-6 py-16">
@@ -43,7 +43,7 @@ export default function CartClient() {
           <div className="md:col-span-2 space-y-4">
             {cart.map((item) => (
               <div
-                key={`${item.product.id}-${item.size}`}
+                key={`${item.product.id}-${item.size}-${item.color ?? ''}`}
                 className="flex gap-4 p-4"
                 style={{ backgroundColor: '#f7f5f2', border: '1px solid #d8d2ca' }}
               >
@@ -60,12 +60,14 @@ export default function CartClient() {
                   <div>
                     <p className="text-xs uppercase tracking-widest mb-1" style={{ color: '#5a5650' }}>{item.product.category}</p>
                     <h3 className="text-xl" style={{ fontFamily: 'Bebas Neue, sans-serif', color: '#0e0e0e' }}>{item.product.name}</h3>
-                    <p className="text-xs mt-1" style={{ color: '#5a5650' }}>Size: {item.size}</p>
+                    <p className="text-xs mt-1" style={{ color: '#5a5650' }}>
+                      {[item.color, `Size: ${item.size}`].filter(Boolean).join(' / ')}
+                    </p>
                   </div>
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => update(item.product.id, item.size, Math.max(1, item.quantity - 1))}
+                        onClick={() => update(item.product.id, item.size, item.color ?? '', Math.max(1, item.quantity - 1))}
                         className="w-7 h-7 flex items-center justify-center transition-colors hover:border-[#c25b2a]"
                         style={{ border: '1px solid #d8d2ca', color: '#5a5650' }}
                       >
@@ -73,7 +75,7 @@ export default function CartClient() {
                       </button>
                       <span className="w-6 text-center text-sm" style={{ color: '#0e0e0e' }}>{item.quantity}</span>
                       <button
-                        onClick={() => update(item.product.id, item.size, item.quantity + 1)}
+                        onClick={() => update(item.product.id, item.size, item.color ?? '', item.quantity + 1)}
                         className="w-7 h-7 flex items-center justify-center transition-colors hover:border-[#c25b2a]"
                         style={{ border: '1px solid #d8d2ca', color: '#5a5650' }}
                       >
@@ -83,7 +85,7 @@ export default function CartClient() {
                     <div className="flex items-center gap-4">
                       <span style={{ color: '#8a6510' }}>${(item.product.price * item.quantity).toFixed(2)}</span>
                       <button
-                        onClick={() => remove(item.product.id, item.size)}
+                        onClick={() => remove(item.product.id, item.size, item.color ?? '')}
                         className="transition-colors hover:text-[#c25b2a]"
                         style={{ color: '#5a5650' }}
                       >
@@ -97,10 +99,7 @@ export default function CartClient() {
           </div>
 
           {/* Summary */}
-          <div
-            className="h-fit p-6"
-            style={{ backgroundColor: '#f7f5f2', border: '1px solid #d8d2ca' }}
-          >
+          <div className="h-fit p-6" style={{ backgroundColor: '#f7f5f2', border: '1px solid #d8d2ca' }}>
             <h2 className="text-2xl mb-6" style={{ fontFamily: 'Bebas Neue, sans-serif', color: '#0e0e0e' }}>Order Summary</h2>
             <div className="space-y-3 text-sm mb-6">
               <div className="flex justify-between">
@@ -143,4 +142,3 @@ export default function CartClient() {
     </div>
   )
 }
-
