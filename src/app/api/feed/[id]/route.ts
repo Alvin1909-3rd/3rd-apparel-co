@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const unauthorized = await requireAdmin()
+  if (unauthorized) return unauthorized
+
   const supabaseAdmin = getSupabaseAdmin()
   const { id } = await params
 

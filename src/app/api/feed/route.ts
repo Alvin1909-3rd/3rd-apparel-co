@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export async function GET() {
   const supabaseAdmin = getSupabaseAdmin()
@@ -14,6 +15,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAdmin()
+  if (unauthorized) return unauthorized
+
   const supabaseAdmin = getSupabaseAdmin()
 
   const formData = await request.formData()
