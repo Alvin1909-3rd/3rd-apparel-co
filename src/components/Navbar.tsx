@@ -5,6 +5,8 @@ import { ShoppingBag, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useCart } from '@/context/CartContext'
 
+const CUSTOM_PRINT_URL = 'https://3rd-apparel-print.vercel.app/'
+
 export default function Navbar() {
   const { count, openCart } = useCart()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -31,6 +33,12 @@ export default function Navbar() {
           <Link href="/#carousel" className="text-sm uppercase tracking-widest hover:text-[#c25b2a] transition-colors" style={{ color: '#5a5650' }}>
             Gallery
           </Link>
+          <a
+            href={CUSTOM_PRINT_URL}
+            className="text-sm uppercase tracking-widest px-4 py-2 transition-colors border border-[#c25b2a] text-[#c25b2a] hover:bg-[#c25b2a] hover:text-white"
+          >
+            Custom Apparel
+          </a>
         </div>
 
         {/* Cart + Mobile Menu */}
@@ -72,6 +80,7 @@ export default function Navbar() {
           <Link href="/shop" onClick={() => setMenuOpen(false)} className="text-sm uppercase tracking-widest pt-4 hover:text-[#c25b2a] transition-colors" style={{ color: '#5a5650' }}>Shop</Link>
           <Link href="/#about" onClick={() => setMenuOpen(false)} className="text-sm uppercase tracking-widest hover:text-[#c25b2a] transition-colors" style={{ color: '#5a5650' }}>About</Link>
           <Link href="/#carousel" onClick={() => setMenuOpen(false)} className="text-sm uppercase tracking-widest hover:text-[#c25b2a] transition-colors" style={{ color: '#5a5650' }}>Gallery</Link>
+          <a href={CUSTOM_PRINT_URL} onClick={() => setMenuOpen(false)} className="text-sm uppercase tracking-widest self-start px-4 py-2 transition-colors border border-[#c25b2a] text-[#c25b2a] hover:bg-[#c25b2a] hover:text-white">Custom Apparel</a>
         </div>
       )}
     </nav>
