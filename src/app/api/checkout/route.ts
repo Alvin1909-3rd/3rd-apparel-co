@@ -6,10 +6,37 @@ import { lookupPromo } from '@/lib/promoCodes'
 
 export async function POST(req: NextRequest) {
   try {
-    const { cart, shippingAddress, email, promoCode } = await req.json()
+    const { cart: clientCart, shippingAddress, email, promoCode } = await req.json()
 
-    if (!cart?.length) {
+    if (!Array.isArray(clientCart) || !clientCart.length) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
+    }
+
+    // Never trust prices, names or images sent by the browser.
+    // Load each product from the database and charge its stored price.
+    const productIds = [...new Set(clientCart.map((item: CartItem) => item?.product?.id).filter(Boolean))]
+    const { data: products, error: productError } = await supabaseAdmin
+      .from('products')
+      .select('*')
+      .in('id', productIds)
+
+    if (productError) throw new Error(productError.message)
+
+    const productById = new Map((products ?? []).map((p) => [p.id, p]))
+    const cart: CartItem[] = []
+    for (const item of clientCart as CartItem[]) {
+      const product = productById.get(item?.product?.id)
+      const quantity = Math.floor(Number(item?.quantity))
+      if (!product || !Number.isFinite(quantity) || quantity < 1 || quantity > 20) {
+        return NextResponse.json(
+          { error: 'An item in your cart is no longer available. Please refresh your cart.' },
+          { status: 400 }
+        )
+      }
+      if (!product.sizes?.includes(item.size)) {
+        return NextResponse.json({ error: `Please pick a valid size for ${product.name}.` }, { status: 400 })
+      }
+      cart.push({ product, size: item.size, color: item.color ?? '', quantity })
     }
 
     const subtotal = cart.reduce(
