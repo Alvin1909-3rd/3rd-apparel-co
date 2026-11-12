@@ -25,7 +25,10 @@ async function sendAndMark(orderId: string, currentSent: string[], tag: string, 
 }
 
 export async function GET(req: NextRequest) {
-  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Without a configured secret the old check accepted the literal header
+  // "Bearer undefined", so anyone could trigger the customer emails.
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
