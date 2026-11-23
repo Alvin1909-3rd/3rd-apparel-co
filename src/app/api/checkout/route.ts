@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase'
 import { CartItem } from '@/lib/types'
 import { lookupPromo } from '@/lib/promoCodes'
+import { getPreorder, isPreorderOpen, cartHasPreorder } from '@/lib/preorders'
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,13 +13,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
     }
 
+    const closedPreorder = cart.find((item: CartItem) => {
+      const p = getPreorder(item.product.slug)
+      return p && !isPreorderOpen(p)
+    })
+    if (closedPreorder) {
+      return NextResponse.json(
+        { error: `The ${closedPreorder.product.name} preorder has closed. Please remove it from your cart.` },
+        { status: 400 }
+      )
+    }
+    const hasPreorder = cartHasPreorder(cart)
+
     const subtotal = cart.reduce(
       (sum: number, item: CartItem) => sum + item.product.price * item.quantity,
       0
     )
     const isTestOrder = cart.some((item: CartItem) => item.product.slug === 'test-product')
     const appliedPromo = promoCode ? lookupPromo(promoCode) : null
-    const baseShipping = subtotal >= 75 || isTestOrder ? 0 : 8.99
+    const baseShipping = subtotal >= 75 || isTestOrder || hasPreorder ? 0 : 8.99
     const shipping = appliedPromo?.type === 'free_shipping' ? 0 : baseShipping
     const total = subtotal + shipping
 
@@ -49,7 +62,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `${item.product.name}${item.color ? ` - ${item.color}` : ''} (${item.size})`,
+              name: `${getPreorder(item.product.slug) ? 'PREORDER: ' : ''}${item.product.name}${item.color ? ` - ${item.color}` : ''} (${item.size})`,
               images: item.product.images.slice(0, 1),
             },
             unit_amount: Math.round(item.product.price * 100),

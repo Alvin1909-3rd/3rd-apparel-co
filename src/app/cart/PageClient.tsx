@@ -1,6 +1,7 @@
 'use client'
 
 import { useCart } from '@/context/CartContext'
+import { cartHasPreorder } from '@/lib/preorders'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Trash2, Minus, Plus } from 'lucide-react'
@@ -29,7 +30,7 @@ export default function CartClient() {
   }
 
   const isTestOrder = cart.some((item) => item.product.slug === 'test-product')
-  const shipping = isTestOrder || total >= 75 ? 0 : 8.99
+  const shipping = isTestOrder || total >= 75 || cartHasPreorder(cart) ? 0 : 8.99
 
   return (
     <div className="min-h-screen px-6 py-16">
