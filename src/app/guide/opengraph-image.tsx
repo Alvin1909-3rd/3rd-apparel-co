@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'The Ledger — Crypto, the easy way';
+export const alt = 'The Ledger: Crypto, the easy way';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -86,7 +86,7 @@ export default async function Image() {
               textTransform: 'uppercase', color: 'rgba(244,242,236,0.3)',
               display: 'flex',
             }}>
-              ENTRY 00 — 08
+              ENTRY 01 TO 08
             </div>
             <div style={{
               fontSize: 96, fontWeight: 700, color: '#F4F2EC',

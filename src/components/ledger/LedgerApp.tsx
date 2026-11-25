@@ -10,7 +10,7 @@ import '@/styles/ledger.css';
 type Scene = 'onboarding' | 'hub' | 'module' | 'toolkit';
 
 export default function LedgerApp() {
-  const { progress, markOnboardingSeen, toggleModule, toggleRedFlag, toggleSecurity, setTheme } =
+  const { progress, loaded, markOnboardingSeen, toggleModule, toggleRedFlag, toggleSecurity, setTheme } =
     useLedgerProgress();
 
   const rootRef = useRef<HTMLDivElement>(null);
@@ -21,12 +21,14 @@ export default function LedgerApp() {
   const [firstVisit, setFirstVisit] = useState(false);
   const [sceneKey, setSceneKey] = useState(0);
 
+  // Wait until saved progress is read from localStorage before choosing the
+  // first scene; otherwise returning visitors always saw onboarding again.
   useEffect(() => {
+    if (!loaded || hydrated) return;
     setHydrated(true);
     setScene(progress.onboardingSeen ? 'hub' : 'onboarding');
     setFirstVisit(!progress.onboardingSeen);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loaded, hydrated, progress.onboardingSeen]);
 
   useEffect(() => {
     if (rootRef.current) {
@@ -70,7 +72,7 @@ export default function LedgerApp() {
       <div className="l-app">
         {scene === 'onboarding' && (
           <div key={sceneKey} className="l-scene">
-            <Onboarding onComplete={handleOnboardingComplete} />
+            <Onboarding onComplete={handleOnboardingComplete} onSeen={markOnboardingSeen} />
           </div>
         )}
         {scene === 'hub' && (

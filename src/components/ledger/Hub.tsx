@@ -3,7 +3,7 @@ import { MODULES } from '@/data/ledgerContent';
 import { LedgerProgress } from '@/hooks/useLedgerProgress';
 import { IconCheck, IconModule, IconToolkit, IconSun, IconMoon } from './icons/ModuleIcons';
 
-const TICKER_TEXT = '  (BTCUSD) · STORAGE OF WEALTH  ·  YOUR KEYS YOUR COINS  ·  NO MIDDLEMAN  ·  8 ENTRIES  ·  SELF-CUSTODY  ·  THE CHOSEN FEW  ·  DO YOUR OWN RESEARCH  ·  ';
+const TICKER_TEXT = '  (BTCUSD) · STORAGE OF WEALTH  ·  YOUR KEYS YOUR COINS  ·  NO MIDDLEMAN  ·  8 ENTRIES  ·  SELF CUSTODY  ·  THE CHOSEN FEW  ·  DO YOUR OWN RESEARCH  ·  ';
 
 interface HubProps {
   progress: LedgerProgress;
@@ -112,7 +112,7 @@ export default function Hub({ progress, firstVisit, onOpenModule, onOpenToolkit,
           <a href="/shop" className="l-hub__footer-link">Get yours →</a>
         </p>
         <p className="l-hub__footer-disclaimer">
-          Educational only — not financial advice. Do your own research.
+          Educational only. Not financial advice. Do your own research.
         </p>
         <p className="l-hub__footer-brand">3RD APPAREL CO · THE CHOSEN FEW</p>
       </div>
