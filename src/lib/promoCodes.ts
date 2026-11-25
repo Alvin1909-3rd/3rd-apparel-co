@@ -6,6 +6,8 @@ export type PromoCode = {
 
 const CODES: Record<string, PromoCode> = {
   FREESHIP: { type: 'free_shipping', label: 'Free Shipping', discount: 8.99 },
+  // Temporary code for pre-drop checkout testing. Remove after testing.
+  TEST: { type: 'free_shipping', label: 'Test', discount: 8.99 },
 }
 
 export function lookupPromo(code: string): PromoCode | null {
