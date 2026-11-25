@@ -31,14 +31,17 @@ function load(): LedgerProgress {
 
 export function useLedgerProgress() {
   const [progress, setProgress] = useState<LedgerProgress>(DEFAULT);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setProgress(load());
+    setLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!loaded) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch {}
-  }, [progress]);
+  }, [progress, loaded]);
 
   const markOnboardingSeen = useCallback(() => {
     setProgress(p => ({ ...p, onboardingSeen: true }));
@@ -75,5 +78,5 @@ export function useLedgerProgress() {
     setProgress(p => ({ ...p, theme }));
   }, []);
 
-  return { progress, markOnboardingSeen, toggleModule, toggleRedFlag, toggleSecurity, setTheme };
+  return { progress, loaded, markOnboardingSeen, toggleModule, toggleRedFlag, toggleSecurity, setTheme };
 }

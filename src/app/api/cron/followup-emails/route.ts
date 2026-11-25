@@ -5,6 +5,7 @@ import { shippingUpdateHtml } from '@/lib/emails/shippingUpdateEmail'
 import { discountEmailHtml } from '@/lib/emails/discountEmail'
 import { abandonedCartEmailHtml } from '@/lib/emails/abandonedCartEmail'
 import { ownerDailyDigestHtml } from '@/lib/emails/ownerAlerts'
+import { cartHasPreorder } from '@/lib/preorders'
 
 const OWNER_EMAIL = process.env.OWNER_EMAIL!
 
@@ -56,7 +57,8 @@ export async function GET(req: NextRequest) {
     const num = orderNum(order.id)
     const createdAt = order.created_at
 
-    if (createdAt >= day3Min && createdAt <= day3Max && !sent.includes('day3')) {
+    // Skip the "on the move" email for preorders: they haven't shipped yet
+    if (createdAt >= day3Min && createdAt <= day3Max && !sent.includes('day3') && !cartHasPreorder(order.items || [])) {
       try {
         await sendAndMark(order.id, sent, 'day3', () =>
           resend.emails.send({

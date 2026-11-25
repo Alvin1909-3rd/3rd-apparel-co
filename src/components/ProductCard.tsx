@@ -5,10 +5,13 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { Product } from '@/lib/types'
 import QuickViewModal from './QuickViewModal'
+import { getPreorder, isPreorderOpen } from '@/lib/preorders'
 
 export default function ProductCard({ product }: { product: Product }) {
   const inStock = Object.values(product.inventory).some((qty) => qty > 0)
   const [quickViewOpen, setQuickViewOpen] = useState(false)
+  const preorder = getPreorder(product.slug)
+  const preorderClosed = preorder ? !isPreorderOpen(preorder) : false
 
   return (
     <>
@@ -32,12 +35,19 @@ export default function ProductCard({ product }: { product: Product }) {
                 <span className="text-4xl" style={{ fontFamily: 'Bebas Neue, sans-serif', color: '#d8d2ca' }}>3RD</span>
               </div>
             )}
-            {!inStock && (
+            {(!inStock || preorderClosed) && (
               <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(247,245,242,0.85)' }}>
-                <span className="text-xs uppercase tracking-widest" style={{ color: '#5a5650' }}>Sold Out</span>
+                <span className="text-xs uppercase tracking-widest" style={{ color: '#5a5650' }}>{preorderClosed ? 'Preorder Closed' : 'Sold Out'}</span>
               </div>
             )}
-            {product.featured && inStock && (
+            {preorder && inStock && !preorderClosed ? (
+              <span
+                className="absolute top-3 left-3 text-xs uppercase tracking-widest px-2 py-1"
+                style={{ backgroundColor: '#c25b2a', color: '#ffffff' }}
+              >
+                Preorder · Ships {preorder.shipsBy}
+              </span>
+            ) : product.featured && inStock && !preorder && (
               <span
                 className="absolute top-3 left-3 text-xs uppercase tracking-widest px-2 py-1"
                 style={{ backgroundColor: '#c25b2a', color: '#ffffff' }}
@@ -54,7 +64,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
 
         {/* Quick View — appears on hover */}
-        {inStock && (
+        {inStock && !preorder && (
           <button
             onClick={() => setQuickViewOpen(true)}
             aria-label={`Quick view ${product.name}`}

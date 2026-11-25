@@ -7,6 +7,7 @@ import { Product } from '@/lib/types'
 import { useCart } from '@/context/CartContext'
 import { pixelAddToCart } from '@/lib/pixel'
 import { getProductColors, getInventoryKey } from '@/lib/cart'
+import { getPreorder, isPreorderOpen } from '@/lib/preorders'
 
 export default function ProductDetails({ product }: { product: Product }) {
   const { add, openCart } = useCart()
@@ -17,6 +18,15 @@ export default function ProductDetails({ product }: { product: Product }) {
   const [added, setAdded] = useState(false)
   const [stickyVisible, setStickyVisible] = useState(false)
   const atcRef = useRef<HTMLDivElement>(null)
+
+  const preorder = getPreorder(product.slug)
+  const [preorderOpen, setPreorderOpen] = useState(() => (preorder ? isPreorderOpen(preorder) : true))
+  useEffect(() => {
+    if (!preorder) return
+    const t = setInterval(() => setPreorderOpen(isPreorderOpen(preorder)), 60_000)
+    return () => clearInterval(t)
+  }, [preorder])
+  const ctaLabel = preorder ? 'Preorder Now' : 'Add to Cart'
 
   const colors = getProductColors(product.inventory)
   const hasColors = colors.length > 0
@@ -38,6 +48,7 @@ export default function ProductDetails({ product }: { product: Product }) {
   }, [])
 
   const handleAdd = (sizeOverride?: string, colorOverride?: string) => {
+    if (preorder && !preorderOpen) { setError('Preorder is closed'); return }
     const sz = sizeOverride || selectedSize
     const cl = colorOverride !== undefined ? colorOverride : selectedColor
     if (hasColors && !cl) { setError('Please select a color'); return }
@@ -106,6 +117,11 @@ export default function ProductDetails({ product }: { product: Product }) {
         {/* Details */}
         <div className="flex flex-col">
           <p className="text-xs uppercase tracking-widest mb-2" style={{ color: '#9e9a94' }}>
+            {preorder && (
+              <span className="mr-3 px-2 py-1" style={{ backgroundColor: '#c25b2a', color: '#f0ece4' }}>
+                Preorder
+              </span>
+            )}
             {product.category}
           </p>
           <h1 className="text-5xl md:text-6xl mb-2" style={{ fontFamily: 'Bebas Neue, sans-serif', color: '#f0ece4' }}>
@@ -121,14 +137,24 @@ export default function ProductDetails({ product }: { product: Product }) {
             {product.description}
           </p>
 
+          {preorder && (
+            <div className="mb-8 p-4 text-sm space-y-1" style={{ border: '1px solid #c25b2a', color: '#f0ece4' }}>
+              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: '#c8a96e' }}>
+                {preorderOpen ? `Preorder closes ${preorder.closesLabel}` : 'Preorder closed'}
+              </p>
+              <p>First run: {preorder.totalRun} pieces, made by hand in Baltimore.</p>
+              <p>Every hoodie ships by {preorder.shipsBy}. Ships free.</p>
+            </div>
+          )}
+
           {/* Color + Size + ATC */}
           <div ref={atcRef}>
-            {availableSizes.length === 0 && !hasColors ? (
+            {(preorder && !preorderOpen) || (availableSizes.length === 0 && !hasColors) ? (
               <div
                 className="w-full py-4 text-center text-sm uppercase tracking-widest"
                 style={{ border: '1px solid #2e2e2e', color: '#9e9a94' }}
               >
-                Sold Out
+                {preorder && !preorderOpen ? 'Preorder Closed' : 'Sold Out'}
               </div>
             ) : (
               <div className="space-y-4">
@@ -199,7 +225,7 @@ export default function ProductDetails({ product }: { product: Product }) {
                   {added ? (
                     <><Check size={16} /> Added to Cart</>
                   ) : (
-                    <><ShoppingBag size={16} /> Add to Cart</>
+                    <><ShoppingBag size={16} /> {ctaLabel}</>
                   )}
                 </button>
               </div>
@@ -209,16 +235,26 @@ export default function ProductDetails({ product }: { product: Product }) {
           <div className="mt-8 pt-8" style={{ borderTop: '1px solid #2e2e2e' }}>
             <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#c8a96e' }}>Details</p>
             <ul className="space-y-1 text-sm" style={{ color: '#9e9a94' }}>
-              <li>Free shipping on orders over $75</li>
-              <li>Returns accepted within 14 days</li>
-              <li>Private label — made to order</li>
+              {preorder ? (
+                <>
+                  <li>Free shipping</li>
+                  <li>Ships by {preorder.shipsBy}</li>
+                  <li>Made by hand in Baltimore once you order</li>
+                </>
+              ) : (
+                <>
+                  <li>Free shipping on orders over $75</li>
+                  <li>Returns accepted within 14 days</li>
+                  <li>Private label — made to order</li>
+                </>
+              )}
             </ul>
           </div>
         </div>
       </div>
 
       {/* Sticky add-to-cart bar */}
-      {(availableSizes.length > 0 || hasColors) && (
+      {(availableSizes.length > 0 || hasColors) && !(preorder && !preorderOpen) && (
         <div
           style={{
             position: 'fixed', bottom: 0, left: 0, right: 0,
@@ -271,7 +307,7 @@ export default function ProductDetails({ product }: { product: Product }) {
               transition: 'background-color 0.2s',
             }}
           >
-            {added ? <><Check size={14} /> Added</> : <><ShoppingBag size={14} /> Add to Cart</>}
+            {added ? <><Check size={14} /> Added</> : <><ShoppingBag size={14} /> {preorder ? 'Preorder' : 'Add to Cart'}</>}
           </button>
         </div>
       )}

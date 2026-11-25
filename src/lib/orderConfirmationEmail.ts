@@ -1,5 +1,7 @@
+import { getPreorder } from './preorders'
+
 interface OrderItem {
-  product: { name: string; price: number }
+  product: { name: string; price: number; slug?: string }
   size: string
   color?: string
   quantity: number
@@ -27,7 +29,7 @@ export function orderConfirmationHtml(order: Order): string {
   const itemRows = order.items.map((item) => `
     <tr>
       <td style="padding:12px 0;border-bottom:1px solid #e8e4df;font-size:14px;color:#0e0e0e;">
-        ${item.product.name} <span style="color:#8a6510;">(${[item.color, item.size].filter(Boolean).join(' / ')})</span>
+        ${item.product.slug && getPreorder(item.product.slug) ? 'Preorder: ' : ''}${item.product.name} <span style="color:#8a6510;">(${[item.color, item.size].filter(Boolean).join(' / ')})</span>
       </td>
       <td style="padding:12px 0;border-bottom:1px solid #e8e4df;font-size:14px;color:#0e0e0e;text-align:right;">
         x${item.quantity}
@@ -39,6 +41,12 @@ export function orderConfirmationHtml(order: Order): string {
   `).join('')
 
   const addr = order.shipping_address
+  const preorder = order.items
+    .map((i) => (i.product.slug ? getPreorder(i.product.slug) : null))
+    .find(Boolean)
+  const processingCopy = preorder
+    ? `Thank you for your preorder. Your hoodie is made by hand in Baltimore and will ship by ${preorder.shipsBy}. We&rsquo;ll email you tracking as soon as it&rsquo;s on the way.`
+    : `Thank you for your order. We&rsquo;ve received your purchase and will begin processing it within 2&ndash;3 business days.`
 
   return `
 <!DOCTYPE html>
@@ -62,7 +70,7 @@ export function orderConfirmationHtml(order: Order): string {
         <tr>
           <td style="padding:32px 40px;border-bottom:1px solid #e8e4df;">
             <p style="margin:0 0 12px;font-size:14px;color:#5a5650;line-height:1.6;">
-              Thank you for your order. We&rsquo;ve received your purchase and will begin processing it within 2&ndash;3 business days.
+              ${processingCopy}
             </p>
             <p style="margin:0;font-size:13px;color:#9e9a94;">Order #${orderNum}</p>
           </td>

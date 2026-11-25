@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
+import { cartHasPreorder } from '@/lib/preorders'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { pixelInitiateCheckout } from '@/lib/pixel'
@@ -17,7 +18,7 @@ export default function CheckoutClient() {
   const [promoError, setPromoError] = useState('')
 
   const isTestOrder = cart.some((item) => item.product.slug === 'test-product')
-  const baseShipping = isTestOrder || total >= 75 ? 0 : 8.99
+  const baseShipping = isTestOrder || total >= 75 || cartHasPreorder(cart) ? 0 : 8.99
   const promoDiscount = appliedPromo?.type === 'free_shipping' ? baseShipping : 0
   const shipping = baseShipping - promoDiscount
   const orderTotal = total + shipping

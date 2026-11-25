@@ -194,7 +194,7 @@ function SizerTab() {
 
       <p className="l-sizer__disclaimer">
         A discipline tool, not financial advice. Your risk, your call.
-        Crypto profits are taxable — keep records from day one.
+        Crypto profits are taxable, so keep records from day one.
       </p>
     </div>
   );
